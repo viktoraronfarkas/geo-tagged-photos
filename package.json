@@ -11,7 +11,9 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
-    "vue": "^3.4.21"
+    "@eox/map": "^1.6.1",
+    "vue": "^3.4.21",
+    "vuetify": "^3.6.7"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.8.0",
