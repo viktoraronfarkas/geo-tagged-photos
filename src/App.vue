@@ -45,12 +45,24 @@ const layers = [
       {
         type: 'select',
         options: {
+          id: 'hoverInteraction',
+          condition: 'pointermove'
+        }
+      },
+      {
+        type: 'select',
+        options: {
           id: 'selectInteraction',
-          condition: 'pointermove',
-          style: {
-            'stroke-color': 'red',
-            'stroke-width': 3
-          }
+          condition: 'click'
+        }
+      }
+    ],
+    style: [
+      {
+        style: {
+          'icon-src': 'https://www.svgrepo.com/show/904/photo-camera.svg',
+          'icon-width': 20,
+          'icon-height': 20
         }
       }
     ]
@@ -58,26 +70,13 @@ const layers = [
   { type: 'Tile', source: { type: 'OSM' } }
 ]
 
-const controlsConfig = {
-  Zoom: {},
-  Attribution: {},
-  OverviewMap: {
-    collapsed: false,
-    layers: [
-      {
-        type: 'Tile',
-        source: {
-          type: 'OSM'
-        }
-      }
-    ]
-  },
-  Geolocation: {
-    tracking: true,
-    trackHeading: true,
-    centerWhenReady: false,
-    highAccuracy: true,
-    trackAccuracy: true
+let selectedFeature = null
+
+const onFeatureSelect = (evt) => {
+  const { id, feature } = evt.detail
+  if (feature && id === 'selectInteraction') {
+    selectedFeature = feature
+    console.log(id, selectedFeature.get('name'))
   }
 }
 </script>
@@ -86,9 +85,10 @@ const controlsConfig = {
   <eox-map
     :center.props="[16.1783173618171, 48.3518231799334]"
     :layers.props="layers"
-    :controls.props="controlsConfig"
+    :controls.props="{}"
     :zoom.props="16"
     style="width: 500px; height: 300px"
+    @select="onFeatureSelect"
     ><eox-map-tooltip></eox-map-tooltip
   ></eox-map>
   <v-carousel height="400" hide-delimiter-background show-arrows>
