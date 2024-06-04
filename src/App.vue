@@ -164,6 +164,7 @@ const layers = [
     </v-carousel-item>
     <div>Please select an image</div>
   </v-carousel>
+  <h2 v-else>Please select a feature on the map!</h2>
 </template>
 
 <style scoped></style>
