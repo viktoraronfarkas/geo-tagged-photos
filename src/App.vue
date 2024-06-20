@@ -109,22 +109,26 @@ const layers = [
       }
     ],
     style: [
+      // {
+      //   // style: {
+      //   //   'icon-src': 'https://www.svgrepo.com/show/904/photo-camera.svg',
+      //   //   'icon-width': 20,
+      //   //   'icon-height': 20
+      //   // }
+      // },
+      // {
+      //   style: {
+      //     'circle-radius': 3,
+      //     'circle-stroke-color': 'red',
+      //     'circle-stroke-width': 1
+      //   }
+      // },
       {
         style: {
-          'circle-radius': 5,
-          'circle-stroke-color': 'black'
-        }
-        // style: {
-        //   'icon-src': 'https://www.svgrepo.com/show/904/photo-camera.svg',
-        //   'icon-width': 20,
-        //   'icon-height': 20
-        // }
-      },
-      {
-        style: {
-          'icon-src': 'https://www.svgrepo.com/show/173372/triangle.svg',
-          'icon-width': 10,
-          'icon-height': 10,
+          'icon-src': 'https://svgshare.com/i/17RV.svg',
+          'icon-width': 20,
+          'icon-height': 30,
+          'icon-offset': [0, 5],
           'icon-rotation': ['get', 'image_direction']
         }
       }
@@ -144,8 +148,9 @@ const layers = [
     style="width: 500px; height: 300px"
     @select="onFeatureSelect"
     @loadend.once="onMapLoadendOnce"
-    ><eox-map-tooltip></eox-map-tooltip
-  ></eox-map>
+    ><eox-map-tooltip></eox-map-tooltip>
+    <h2>{{ selectedFeature?.get('date') }}</h2></eox-map
+  >
   <v-carousel
     v-model="selectedIndex"
     v-if="mapLoaded && featureCollection && selectedFeature"
