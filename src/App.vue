@@ -137,7 +137,7 @@ const layers = [
           'icon-width': 20,
           'icon-height': 30,
           'icon-offset': [0, 5],
-          'icon-rotation': ['get', 'image_direction']
+          'icon-rotation': ['get', 'image_direction_rad']
         }
       }
     ]
@@ -176,6 +176,7 @@ const layers = [
     v-if="mapLoaded && featureCollection && selectedFeature"
     height="300"
     hide-delimiter-background
+    hide-delimiters
     :show-arrows="true"
     continuous="false"
     class="carousel"
