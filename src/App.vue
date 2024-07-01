@@ -3,6 +3,7 @@ import { ref, watch } from 'vue'
 import '@eox/map'
 import '@eox/map/dist/eox-map-advanced-layers-and-sources.js'
 import '@eox/map/dist/eox-map.js'
+import Feature from 'ol/Feature.js'
 
 const photos = {
   type: 'FeatureCollection',
@@ -38,6 +39,7 @@ let selectedFeature = ref(null)
 let mapLoaded = ref(false)
 let featureCollection = ref(null)
 let selectedIndex = ref(0)
+let date = ref(null)
 
 const onMapLoadendOnce = () => {
   mapLoaded.value = true
@@ -48,7 +50,7 @@ const onFeatureSelect = (evt) => {
   if (feature && id === 'selectInteraction') {
     selectedFeature.value = feature
     selectedIndex.value = feature.getId()
-    console.log(selectedFeature.value, selectedIndex.value)
+    date.value = selectedFeature.value.get('date')
   }
 }
 
@@ -65,24 +67,30 @@ fetchFeatures()
 
 const getImages = () => {
   const layers = document.getElementById('eoxMap').map.getLayers()
-  console.log(layers.values)
 }
 
-const translatePoint = (distance, angleDegrees) => {
-  console.log(angleDegrees)
-  let angleRadians = angleDegrees * (Math.PI / 180)
-
-  let x1 = distance * Math.cos(angleRadians)
-  let y1 = distance * Math.sin(angleRadians)
-
-  return [x1, y1]
+const getClickInteraction = () => {
+  return document.getElementById('eoxMap').selectInteractions.selectInteraction
 }
 
-watch(selectedIndex, (newIndex) => {
-  if (featureCollection.value && featureCollection.value.features[newIndex]) {
-    selectedFeature.value = featureCollection.value.features[newIndex]
-  }
-})
+const prev = () => {
+  selectedIndex.value = Math.max(selectedIndex.value - 1, 0)
+  getClickInteraction().highlightById(selectedIndex.value.toString())
+  selectedFeature.value = featureCollection.features.find(
+    (feature) => feature.id === selectedIndex.value.toString()
+  )
+  date.value = selectedFeature.value.properties.date
+}
+
+const next = () => {
+  selectedIndex.value = Math.min(selectedIndex.value + 1, featureCollection.features.length - 1)
+  getClickInteraction().highlightById(selectedIndex.value.toString())
+  selectedFeature.value = featureCollection.features.find(
+    (feature) => feature.id === selectedIndex.value.toString()
+  )
+
+  date.value = selectedFeature.value.properties.date
+}
 
 const layers = [
   {
@@ -134,7 +142,20 @@ const layers = [
       }
     ]
   },
-  { type: 'Tile', source: { type: 'OSM' } }
+  {
+    type: 'Image',
+    properties: {
+      id: 'imageLayer'
+    },
+    source: {
+      type: 'ImageWMS',
+      url: 'https://agri-dev-qaywsx.demo.hub.eox.at/vs/ows',
+      params: {
+        LAYERS: 'S2L2A__TRUE_COLOR',
+        time: '2022-09-07T00:00:00Z/2022-09-07T23:59:59Z'
+      }
+    }
+  }
 ]
 </script>
 
@@ -145,31 +166,50 @@ const layers = [
     :layers.props="layers"
     :controls.props="{}"
     :zoom.props="16"
-    style="width: 500px; height: 300px"
+    style="width: 500px; height: 300px; top: 50%; margin-right: 50px"
     @select="onFeatureSelect"
     @loadend.once="onMapLoadendOnce"
     ><eox-map-tooltip></eox-map-tooltip>
-    <h2>{{ selectedFeature?.get('date') }}</h2></eox-map
-  >
+  </eox-map>
   <v-carousel
     v-model="selectedIndex"
     v-if="mapLoaded && featureCollection && selectedFeature"
-    height="400"
+    height="300"
     hide-delimiter-background
-    :show-arrows="false"
+    :show-arrows="true"
+    continuous="false"
+    class="carousel"
   >
-    <!-- <template v-slot:prev="{ props }">
-      <v-btn color="success" variant="elevated" @click="props.onClick">Prev</v-btn>
+    <template v-slot:prev="{ props }">
+      <v-btn color="success" variant="elevated" @click="prev">Prev</v-btn>
     </template>
     <template v-slot:next="{ props }">
-      <v-btn color="info" variant="elevated" @click="props.onClick">Next</v-btn>
-    </template> -->
+      <v-btn color="info" variant="elevated" @click="next">Next</v-btn>
+    </template>
     <v-carousel-item v-for="(feature, key) in featureCollection.features" :key="key" cover>
-      <v-img :src="feature.properties.url"></v-img>
+      <v-img :src="feature.properties.url" style="max-height: 300px"></v-img>
     </v-carousel-item>
-    <div>Please select an image</div>
+    <h2 class="date">{{ date }}</h2>
   </v-carousel>
-  <h2 v-else>Please select a feature on the map!</h2>
+  <h2 class="carousel" v-else>Please select a feature on the map!</h2>
 </template>
 
-<style scoped></style>
+<style scoped>
+.carousel {
+  position: relative;
+  height: 300px;
+}
+.date {
+  position: absolute;
+  background-color: white;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1rem;
+  padding: 5px 10px;
+}
+
+.v-img__img--contain {
+  object-fit: cover;
+}
+</style>
